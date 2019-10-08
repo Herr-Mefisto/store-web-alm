@@ -17,6 +17,10 @@ export default class Header extends React.Component {
         <NavLink to="/about" activeStyle={this.activeStyle}>
           About
         </NavLink>
+        {"  |  "}
+        <NavLink to="/products" activeStyle={this.activeStyle}>
+          Products
+        </NavLink>
       </nav>
     );
   }

@@ -3,36 +3,39 @@ import { connect } from "react-redux";
 import * as productsActions from "../../redux/actions/productActions";
 import PropTypes from "prop-types";
 import { bindActionCreators } from "redux";
+import ProductList from "./ProductList";
+import TextSearch from "../common/TextSearch";
 
 class ProductsPage extends React.Component {
-  state = { product: { title: "" } };
-
-  handleChange = event => {
-    const product = { ...this.state.product, title: event.target.value };
-    this.setState({ product });
+  constructor(props) {
+    super(props);
+    this.state = { name: null };
+  }
+  onFilterChanged = newFilter => {
+    this.setState({ name: newFilter !== "" ? newFilter : null }, () =>
+      this.refreshData()
+    );
   };
+  componentWillMount() {
+    this.refreshData();
+  }
 
-  handleSubmit = event => {
-    event.preventDefault();
-    this.props.actions.createProduct(this.state.product);
+  refreshData = () => {
+    this.props.actions.loadProducts(this.state).catch(err => {
+      alert("Loading failed" + err);
+    });
   };
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <>
         <h2>Products</h2>
-        <h3>Add product</h3>
-        <input
-          type="text"
-          onChange={this.handleChange}
-          value={this.state.product.title}
-        />
-        <input type="submit" value="Save" />
-
-        {this.props.products.map(product => (
-          <div key={product.title}>{product.title}</div>
-        ))}
-      </form>
+        <TextSearch onSubmit={this.onFilterChanged}></TextSearch>
+        <ProductList
+          products={this.props.products}
+          filter={this.state.filter}
+        ></ProductList>
+      </>
     );
   }
 }

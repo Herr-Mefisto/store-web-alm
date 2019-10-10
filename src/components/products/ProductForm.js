@@ -1,7 +1,12 @@
 import React, { Component } from "react";
+import { connect } from "react-redux";
+import * as colorsActions from "../../redux/actions/colorsActions";
+import { bindActionCreators } from "redux";
 import TextInput from "../common/TextInput";
 import NumberInput from "../common/NumberInput";
 import ConfirmModal from "../common/ConfirmModal";
+import Select from "../common/Select";
+import * as productsApi from "../../api/productsApi";
 
 class ProductForm extends Component {
   constructor(props) {
@@ -9,16 +14,19 @@ class ProductForm extends Component {
     this.state = { quantity: 0, name: "", price: 0 };
     const id = props.match.params.id;
 
-    fetch("http://localhost:4000/products/" + id, {
-      method: "GET",
-      headers: { "Content-type": "application/json" }
-    })
-      .then(resp => resp.json())
+    this.props.actions.loadColors(this.state).then(result => {
+      this.availableColors = result.colors;
+    });
+    productsApi
+      .getProduct(id)
       .then(data => {
         this.setState(data);
       })
       .catch(err => {});
   }
+
+  availableColors = [];
+
   onTitleChanged = newValue => {
     this.setState({ ...this.state, name: newValue });
   };
@@ -28,18 +36,14 @@ class ProductForm extends Component {
   onPriceChanged = newValue => {
     this.setState({ ...this.state, price: newValue });
   };
+  onColorChanged = newValue => {
+    this.setState({ ...this.state, color: newValue });
+  };
+
   onSubmitForm = event => {
     event.preventDefault();
-    const data = this.state;
-    const id = this.state.id;
-
-    data["id"] = undefined;
-    data["color"] = undefined;
-    fetch("http://localhost:4000/products/" + id, {
-      method: "PUT",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(data)
-    })
+    productsApi
+      .saveProduct({ ...this.state })
       .then(a => {})
       .catch(err => {
         alert(err);
@@ -47,11 +51,8 @@ class ProductForm extends Component {
   };
 
   onDeleteRequested = event => {
-    const id = this.state.id;
-    fetch("http://localhost:4000/products/" + id, {
-      method: "DELETE",
-      headers: { "Content-type": "application/json" }
-    })
+    productsApi
+      .deleteProduct(this.state.id)
       .then(a => {})
       .catch(err => {
         alert(err);
@@ -97,6 +98,12 @@ class ProductForm extends Component {
             max="10000"
             step="0.01"
           ></NumberInput>
+          <Select
+            title="Color"
+            options={this.availableColors}
+            value={this.state.color}
+            onChange={this.onColorChanged}
+          ></Select>
           <input
             type="submit"
             className="form-control"
@@ -110,4 +117,19 @@ class ProductForm extends Component {
   }
 }
 
-export default ProductForm;
+function mapStateToProps(state) {
+  return {
+    colors: state.colors
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    actions: bindActionCreators(colorsActions, dispatch)
+  };
+}
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ProductForm);

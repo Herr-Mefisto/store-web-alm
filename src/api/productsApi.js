@@ -9,9 +9,18 @@ export function getProducts(filter) {
     .catch(handleError);
 }
 
+export function getProduct(id) {
+  let url = new URL(baseUrl + id);
+  return fetch(url)
+    .then(handleResponse)
+    .catch(handleError);
+}
+
 export function saveProduct(product) {
-  return fetch(baseUrl + (product.id || ""), {
-    method: product.id ? "PUT" : "POST",
+  const id = product.id;
+  delete product["id"];
+  return fetch(baseUrl + (id || ""), {
+    method: id ? "PUT" : "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(product)
   })

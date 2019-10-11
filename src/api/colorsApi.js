@@ -1,5 +1,6 @@
 import { handleResponse, handleError } from "./apiUtils";
-const baseUrl = "http://localhost:4000/colors";
+import * as config from "../config";
+const baseUrl = config.default.apiUrl + "/colors";
 export function getColors() {
   return fetch(baseUrl)
     .then(handleResponse)

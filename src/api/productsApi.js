@@ -1,5 +1,6 @@
 import { handleResponse, handleError, cleanParameters } from "./apiUtils";
-const baseUrl = "http://localhost:4000/products/";
+import * as config from "../config";
+const baseUrl = config.default.apiUrl + "/products/";
 
 export function getProducts(filter) {
   let url = new URL(baseUrl);
